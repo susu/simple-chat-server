@@ -26,3 +26,10 @@ Run
 cd build
 src/run_chatserver
 ```
+
+Connect
+=======
+
+```
+telnet localhost 5050
+```
