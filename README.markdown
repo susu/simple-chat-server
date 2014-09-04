@@ -1,10 +1,28 @@
-cpp-starter-kit-cmake
-=====================
+simple-chat-server
+==================
 
-C++ starter kit with CMake and igloo BDD framework.
+A very simple multithreaded chat server in C++11, using BSD sockets.
+For educational purposes (a kata).
+
 
 Clone this repo such way:
 ```
 git clone --recursive <repo>
 ```
+Build
+=====
 
+```
+mkdir build
+cd build
+cmake ../
+make
+```
+
+Run
+===
+
+```
+cd build
+src/run_chatserver
+```
