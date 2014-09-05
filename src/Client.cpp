@@ -13,7 +13,9 @@ Client::Client(int socket, struct sockaddr_in address, Server & server)
     : m_server(server)
     , m_socket(socket)
     , m_address(address)
-{}
+{
+    std::cout << "Client connected (fd=" << m_socket << ", addr=" << getAddress() << ")" << std::endl;
+}
 
 Client::~Client()
 {
@@ -42,6 +44,7 @@ void Client::run()
 
         if (len == 0)
         {
+            std::cout << "Client disconnected (fd=" << m_socket << ", addr=" << getAddress() << ")" << std::endl;
             // TODO disconnect from server!
             return;
         }
@@ -54,33 +57,9 @@ void Client::run()
 
         std::string message(buffer, len);
 
-        if (message[0] == '/')
-        {
-            // message started with /, it should be a command
-            bool shouldExit = processCommand(std::move(message));
-
-            if (shouldExit)
-                return;
-        }
-        else
-        {
-            // broadcastMessage() will lock mutex
-            m_server.get().broadcastMessage(*this, std::move(message));
-        }
+        // broadcastMessage() will lock mutex
+        m_server.get().broadcastMessage(*this, std::move(message));
     }
-}
-
-bool Client::processCommand(std::string message)
-{
-    if (message.find("quit") == 1)
-    {
-        // indicate that we want to disconnect
-        m_wantToLeave = true;
-
-        // returning with true, indicating that the thread should exit
-        return true;
-    }
-    return false;
 }
 
 std::string Client::getAddress() const

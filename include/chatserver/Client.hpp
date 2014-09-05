@@ -42,9 +42,6 @@ namespace chatserver
 
             void sendMessage(std::string message);
 
-            bool IsWantToLeave() const
-            { return m_wantToLeave; }
-
         private:
             /**
              * returns true if the client should be stopped
@@ -54,7 +51,6 @@ namespace chatserver
             std::reference_wrapper<Server> m_server; // reference to the original server.
             int m_socket;
             struct sockaddr_in m_address;
-            bool m_wantToLeave = false;
             std::thread m_thread;
     };
 }

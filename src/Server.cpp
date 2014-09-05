@@ -29,8 +29,6 @@ void Server::run()
 
     while (true)
     {
-        processLeavers();
-
         struct sockaddr_in clientAddress;
         memset(&clientAddress, 0, sizeof(struct sockaddr_in));
 
@@ -56,20 +54,6 @@ void Server::broadcastMessage(const Client & sender, std::string message)
     }
 
     // No need for explicit unlock/release of the mutex, lock_guard do it in its destructor.
-}
-
-void Server::processLeavers()
-{
-    std::lock_guard<std::mutex> _lock(m_mutex);
-
-    for (auto it = begin(m_clients); it != end(m_clients); ++it)
-    {
-        if (it->IsWantToLeave())
-        {
-            it->finish();
-            it = m_clients.erase(it);
-        }
-    }
 }
 
 void Server::initializeSocket()
