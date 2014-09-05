@@ -65,6 +65,10 @@ void Server::initializeSocket()
 
     m_serverSocketFd = socket(AF_INET, SOCK_STREAM, 0);
 
+    // Let bind to reuse previously bound adress.
+    int val = 1;
+    setsockopt(m_serverSocketFd, SOL_SOCKET, SO_REUSEADDR, &val, sizeof(val));
+
     int result = bind(m_serverSocketFd, (struct sockaddr*)&m_serverAddress, sizeof(struct sockaddr_in));
     if (result < 0)
     {
