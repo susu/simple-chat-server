@@ -14,7 +14,7 @@ endif(UNIX)
 #
 ##########
 
-set(LIBS ${LIBS})
+set(LIBS ${LIBS} -pthread)
 
 if(UNIX)
     if(enable_libc++)
@@ -39,6 +39,7 @@ add_definitions(-std=c++11
                 -Werror
                 -g
                 -fPIC
+                -pthread
                 )
 
 
