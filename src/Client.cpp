@@ -3,18 +3,17 @@
 #include <iostream>
 #include <cstring>
 #include <sys/socket.h>
-#include <arpa/inet.h>
 #include <chatserver/Server.hpp>
 
 using namespace chatserver;
 
 
-Client::Client(int socket, struct sockaddr_in address, Server & server)
-    : m_server(server)
+Client::Client(std::string name, int socket, struct sockaddr_in address, Server & server)
+    : m_name(name)
+    , m_server(server)
     , m_socket(socket)
-    , m_address(address)
 {
-    std::cout << "Client connected (fd=" << m_socket << ", addr=" << getAddress() << ")" << std::endl;
+    std::cout << "Client connected (fd=" << m_socket << ", addr=" << getName() << ")" << std::endl;
 }
 
 Client::~Client()
@@ -26,13 +25,7 @@ void Client::start()
 {
     // Start a thread that will call the client's run() method, then move on.
     // (do not confuse std::bind() with POSIX bind()!)
-    m_thread = std::thread(std::bind(&Client::run, this));
-}
-
-void Client::finish()
-{
-    if (m_thread.joinable())
-        m_thread.join();
+    m_thread = std::thread(std::bind(&Client::run, shared_from_this()));
 }
 
 void Client::run()
@@ -44,15 +37,13 @@ void Client::run()
 
         if (len == 0)
         {
-            std::cout << "Client disconnected (fd=" << m_socket << ", addr=" << getAddress() << ")" << std::endl;
-            // TODO disconnect from server!
-            return;
+            std::cout << "Client disconnected (fd=" << m_socket << ", addr=" << getName() << ")" << std::endl;
+            break;
         }
         if (len < 0)
         {
             std::cerr << "Could not receive from client: " << strerror(errno) << std::endl;
-            // TODO disconnect from server!
-            return;
+            break;
         }
 
         std::string message(buffer, len);
@@ -60,17 +51,8 @@ void Client::run()
         // broadcastMessage() will lock mutex
         m_server.get().broadcastMessage(*this, std::move(message));
     }
-}
-
-std::string Client::getAddress() const
-{
-    char buffer[256];
-    const char * result = inet_ntop(AF_INET, &m_address.sin_addr, buffer, sizeof(buffer));
-
-    if (result == nullptr)
-        std::cerr << "Could not convert client address:" << strerror(errno) << std::endl;
-
-    return std::string(buffer);
+    m_server.get().disconnectClient(this);
+    m_thread.detach();
 }
 
 void Client::sendMessage(std::string message)

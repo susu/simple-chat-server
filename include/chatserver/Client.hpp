@@ -9,19 +9,19 @@
 namespace chatserver
 {
     class Server;
-    class Client
+    class Client : public std::enable_shared_from_this<Client>
     {
         public:
-            Client(int socket, struct sockaddr_in address, Server & server);
+            Client(std::string name, int socket, struct sockaddr_in address, Server & server);
             ~Client();
 
             // Copying is forbidden!
             Client(const Client&) = delete;
             Client& operator=(const Client&) = delete;
 
-            // Moving is allowed.
-            Client(Client&&) = default;
-            Client& operator=(Client&&) = default;
+            // Moving is forbidden!
+            Client(Client&&) = delete;
+            Client& operator=(Client&&) = delete;
 
             /**
              * Thread entry point
@@ -33,24 +33,15 @@ namespace chatserver
              */
             void start();
 
-            /**
-             * Wait for the thread to stop (blocking!)
-             */
-            void finish();
-
-            std::string getAddress() const;
+            std::string getName() const
+            { return m_name; }
 
             void sendMessage(std::string message);
 
         private:
-            /**
-             * returns true if the client should be stopped
-             */
-            bool processCommand(std::string message);
-
+            std::string m_name;
             std::reference_wrapper<Server> m_server; // reference to the original server.
             int m_socket;
-            struct sockaddr_in m_address;
             std::thread m_thread;
     };
 }
