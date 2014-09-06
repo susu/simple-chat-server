@@ -34,7 +34,7 @@ endif(UNIX)
 
 include_directories(include)
 
-add_definitions(-std=c++11
+add_definitions(-std=c++1y
                 -Wall
                 -Werror
                 -g
